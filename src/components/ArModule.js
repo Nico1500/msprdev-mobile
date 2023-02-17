@@ -3,7 +3,7 @@ import { GLView } from 'expo-gl';
 import { Renderer, Scene, PerspectiveCamera } from 'expo-three';
 import * as THREE from "three";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-
+import ExpoGraphics from 'expo-graphics';
 
 export default function ARViewer() {
   const renderer = useRef();
@@ -21,7 +21,7 @@ export default function ARViewer() {
     camera.current.position.z = 5;
 
     const objLoader = new OBJLoader();
-    objLoader.load('models/my-model.obj', (loadedModel) => {
+    objLoader.load('../../assets/bugatti.obj', (loadedModel) => {
       const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
       const mesh = new THREE.Mesh(loadedModel, material);
       scene.current.add(mesh);
@@ -33,6 +33,13 @@ export default function ARViewer() {
   };
 
   return (
-    <GLView style={{ flex: 1 }} onContextCreate={onContextCreate} onRender={onRender} />
+    <>
+      <GLView style={{ flex: 1 }} onContextCreate={onContextCreate} onRender={onRender} />
+      <ExpoGraphics.View onContextCreate={({ gl, width, height, scale }) => {
+        renderer.setPixelRatio(scale);
+        renderer.setSize(width, height);
+      }} onRender={onRender} >
+      </ExpoGraphics.View>
+    </> 
   );
 }
