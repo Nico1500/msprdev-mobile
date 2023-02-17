@@ -1,78 +1,38 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Expo from 'expo';
-import ExpoTHREE, { THREE } from 'expo-three';
-import { View as GraphicsView } from 'expo-graphics';
-import { Asset } from 'expo-asset';
+import React, { useRef } from 'react';
+import { GLView } from 'expo-gl';
+import { Renderer, Scene, PerspectiveCamera } from 'expo-three';
+import * as THREE from "three";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-export const Ar = () => {
-  return (
-    <GraphicsView
-      onContextCreate={onContextCreate}
-      onRender={onRender}
-      onResize={onResize}
-      isArEnabled
-      isArRunningStateEnabled
-      isArCameraStateEnabled
-      isArTrackingStateEnabled
-    />
-  );
-}
 
-const onContextCreate = async ({ gl, scale: pixelRatio, width, height }) => {
-  // init renderer
-  const renderer = new ExpoTHREE.Renderer({
-    gl,
-    pixelRatio,
-    width,
-    height,
-  });
-  renderer.setClearColor(0xffffff);
-  renderer.gammaInput = true;
-  renderer.gammaOutput = true;
+export default function ARViewer() {
+  const renderer = useRef();
+  const scene = useRef();
+  const camera = useRef();
+  const model = useRef();
 
-  // init scene
-  const scene = new THREE.Scene();
+  const onContextCreate = async (gl) => {
+    renderer.current = new Renderer({ gl });
+    renderer.current.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-  // init camera
-  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-  camera.position.set(0, 0, 5);
+    scene.current = new THREE.Scene();
 
-  // init controls
-  const controls = new OrbitControls(camera);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.25;
-  controls.enableZoom = true;
+    camera.current = new THREE.PerspectiveCamera(75, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000);
+    camera.current.position.z = 5;
 
-  // load obj file
-  const obj = await loadObjAsync();
-  scene.add(obj);
-
-  // render loop
-  const render = () => {
-    requestAnimationFrame(render);
-    controls.update();
-    renderer.render(scene, camera);
-    gl.endFrameEXP();
+    const objLoader = new OBJLoader();
+    objLoader.load('models/my-model.obj', (loadedModel) => {
+      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const mesh = new THREE.Mesh(loadedModel, material);
+      scene.current.add(mesh);
+    });
   };
-  render();
-}
 
-const onRender = () => {
-}
+  const onRender = () => {
+    renderer.current.render(scene.current, camera.current);
+  };
 
-const onResize = ({ x, y, scale, width, height }) => {
-}
-
-const loadObjAsync = async () => {
-  const objAsset = Asset.fromModule(require('../../assets/model.obj'));
-  await objAsset.downloadAsync();
-  const mtlAsset = Asset.fromModule(require('../../assets/model.mtl'));
-  await mtlAsset.downloadAsync();
-
-  const objLoader = new OBJLoader();
-  const obj = objLoader.parse(objAsset.localUri);
-  return obj;
+  return (
+    <GLView style={{ flex: 1 }} onContextCreate={onContextCreate} onRender={onRender} />
+  );
 }
