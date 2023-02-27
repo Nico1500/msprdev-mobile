@@ -22,7 +22,6 @@ let fullWidth = Dimensions.get("window").width;
 
 export default function TabBar() {
   return (
-    <NavigationContainer>
       <Tab.Navigator screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
@@ -46,7 +45,6 @@ export default function TabBar() {
         <Tab.Screen name="Profil" component={Login} />
         <Tab.Screen name="Liste" component={ItemList} />
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }
 
