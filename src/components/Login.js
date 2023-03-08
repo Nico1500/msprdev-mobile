@@ -6,20 +6,25 @@ import axios from 'axios';
 const Login = (props) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         // Récupération de l'ID utilisateur dans AsyncStorage
-        const userId = await AsyncStorage.getItem('userId');
-        if (userId) {
+        const usermail = await AsyncStorage.getItem('mail');
+        const usermdp = await AsyncStorage.getItem('mdp');
+
+        console.log(usermail);
+        console.log(usermdp);
+	
+        if (usermail !== null && usermdp !== null) {
           // Envoi de l'ID utilisateur à l'API REST pour se connecter
-          const response = await axios.get('https://localhost:3000/getSession', { userId: userId });
+          const response = await axios.get(`http://20.111.12.5:3000/users/login?email=${usermail}&password=${usermdp}`);
           // Traitement de la réponse de l'API REST ici
           console.log(response.data);
           if (response.data === 'OK') {
-            setLoggedIn(true);
+            //setLoggedIn(true);
           }
         } else {
           setLoggedIn(false);
@@ -52,10 +57,23 @@ const Login = (props) => {
     setPassword(text);
   };
 
-  const handleLogin = () => {
-    // Vérification des informations d'identification ici, par exemple en appelant une API REST
-    // Si les informations d'identification sont correctes, naviguez vers l'écran d'accueil
-    props.navigation.navigate('TabBar');
+  const handleLogin = async () => {
+
+    const usermail = await AsyncStorage.setItem('mail', username);
+    const mdpuser = await AsyncStorage.setItem('mdp', password);
+    const response = await axios.get(`http://20.111.12.5:3000/users/login?email=${username}&password=${password}`);
+    // Traitement de la réponse de l'API REST ici
+    console.log(response.data);
+    
+    if (response.data.message === "Vous devez valider votre clé API avant de vous connecter.") {
+      props.navigation.navigate('qrcode');
+    }
+    //props.navigation.navigate('TabBar');
+  };
+
+  const handleSignup = () => {
+    // Rediriger vers l'écran d'inscription
+    props.navigation.navigate('Signup');
   };
 
   return (
@@ -71,7 +89,7 @@ const Login = (props) => {
             <Text style={styles.title}>Connexion</Text>
             <TextInput
               style={styles.input}
-              placeholder="Nom d'utilisateur"
+              placeholder="Email"
               onChangeText={handleUsernameChange}
               value={username}
             />
@@ -85,6 +103,10 @@ const Login = (props) => {
             <Button
               title="Se connecter"
               onPress={handleLogin}
+            />
+            <Button
+              title="S'inscrire"
+              onPress={handleSignup}
             />
           </>
         }

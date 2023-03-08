@@ -3,8 +3,10 @@ import { Dimensions, Text, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ItemList from '../components/Items/ItemList';
+import ItemList from '../components/Items/ArticleList';
 import Login from '../components/Login';
+import QRCodeScanner from '../components/QrCode';
+import CustomerList from '../components/Items/CustomerList';
 
 
 function SettingsScreen() {
@@ -26,11 +28,11 @@ export default function TabBar() {
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
 
-            if (route.name === 'Profil') {
+            if (route.name === 'Clients') {
               iconName = focused
                 ? 'ios-information-circle'
                 : 'ios-information-circle-outline';
-            } else if (route.name === 'Liste') {
+            } else if (route.name === "Liste d'Articles") {
               iconName = focused ? 'ios-list' : 'ios-list-outline';
             }
 
@@ -42,8 +44,8 @@ export default function TabBar() {
           tabBarInactiveTintColor: 'gray',
         })}
       >
-        <Tab.Screen name="Profil" component={Login} />
-        <Tab.Screen name="Liste" component={ItemList} />
+        <Tab.Screen name="Clients" component={CustomerList} />
+        <Tab.Screen name="Liste d'Articles" component={ItemList} />
       </Tab.Navigator>
   );
 }
